@@ -28,7 +28,7 @@ class Tea
   output_t Decrypt(input_t in);
 
  private:
-  std::vector<uint8_t> key_;
+  std::vector<uint32_t> key_;
 };
 
 }

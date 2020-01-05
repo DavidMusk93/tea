@@ -17,12 +17,15 @@ Tea::Tea()
 Tea::Tea(const char *key)
 {
   int i,n;
-  for (i=0,n=strlen(key); i<n; ++i) {
+  char a[kKeySize];
+  for (i=0,n=strlen(key); i<kKeySize; ++i) {
     if (i<n)
-      key_.emplace_back(key[i]);
+      a[i]=key[i];
     else
-      key_.emplace_back(0);
+      a[i]=0;
   }
+  key_.resize(kKeySize/sizeof(int));
+  memcpy(key_.data(), a, kKeySize);
 }
 
 Tea::Tea(Tea&& t)
@@ -79,6 +82,7 @@ Tea::output_t Tea::Encrypt(input_t in)
     else
       plain.Set((uint8_t)0);
     if (plain.IsFull()) {
+      debug("%lx:%lx", (uint64_t)b1, (uint64_t)b2);
       plain.Xor(b1);
       TeaCore::Encrypt(
           (const uint32_t *)plain.Get(),
