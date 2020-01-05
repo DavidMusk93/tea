@@ -4,6 +4,7 @@
 #include "Rand.h"
 #include "Block.h"
 #include "TeaCore.h"
+#include "debug.h"
 
 namespace sun
 {
@@ -61,6 +62,7 @@ Tea::output_t Tea::Encrypt(input_t in)
   uint8_t *ip,*op;
   int i,pad;
   pad=(-in.size()-2)%Block::kBlockSize;
+  debug("pad:%d", pad);
   if (pad<0)
     pad+=8;
   const int k1=1+pad+2;
@@ -76,14 +78,18 @@ Tea::output_t Tea::Encrypt(input_t in)
       plain.Set(*ip++);
     else
       plain.Set((uint8_t)0);
-    plain.Xor(b1);
-    TeaCore::Encrypt(
-        (const uint32_t *)plain.Get(),
-        (uint32_t *)cipher.Get(),
-        GetKey());
-    cipher.Xor(b2);
-    b1=cipher;
-    b2=plain;
+    if (plain.IsFull()) {
+      plain.Xor(b1);
+      TeaCore::Encrypt(
+          (const uint32_t *)plain.Get(),
+          (uint32_t *)cipher.Get(),
+          GetKey());
+      cipher.Xor(b2);
+      b1=cipher;
+      b2=plain;
+      *(uint64_t *)op=(uint64_t)cipher;
+      op+=8;
+    }
   }
   return out;
 }
@@ -99,9 +105,9 @@ Tea::output_t Tea::Decrypt(input_t in)
   if (n%8 || n<16)
     goto end;
   ip=in.data();
-  for (i=1; i<n; ++i) {
+  for (i=1; i<=n; ++i) {
     cipher.Set(*ip++);
-    if (plain.IsFull()) {
+    if (cipher.IsFull()) {
       t1=cipher;
       cipher.Xor(b2);
       TeaCore::Decrypt(
@@ -113,23 +119,22 @@ Tea::output_t Tea::Decrypt(input_t in)
       b1=t1;
       b2=t2;
       p=plain.Get();
-      for (j=i-8; j<i; ++i) {
+      debug("i:%d", i);
+      for (j=i-8; j<i; ++j) {
         if (!j) {
           pad=*p++&(Block::kBlockSize-1);
+          debug("pad:%d", pad);
           k1=1+pad+2;
           out.resize(n-k1-7);
           op=out.data();
           k2=k1+out.size();
         }
-        else if (j<k1) {
+        else if (j<k1)
           ++p;
-        }
-        else if (j<k2) {
+        else if (j<k2)
           *op++=*p++;
-        }
-        else {
+        else
           goto end;
-        }
       }
     }
   }
