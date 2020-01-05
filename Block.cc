@@ -16,6 +16,11 @@ void Block::Set(uint8_t v)
   b_.a[i_++] = v;
 }
 
+void Block::Xor(const Block& b)
+{
+  b_.n ^= (uint64_t)b;
+}
+
 const uint8_t *Block::Get()
 {
   return const_cast<const uint8_t *>(b_.a);

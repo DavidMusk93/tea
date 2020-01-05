@@ -14,6 +14,7 @@ class Block
   void Set(const uint8_t *a);
   void Set(uint8_t v);
 
+  void Xor(const Block& b);
   const uint8_t *Get();
   bool IsFull();
 
