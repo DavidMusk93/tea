@@ -20,8 +20,10 @@ void Rand::BlockRead()
 {
   if (fd_ < 0)
     Open();
-  if (i_ == kBufferSize)
+  if (i_ == kBufferSize) {
+    i_ = 0;
     (void)read(fd_, buf_, kBufferSize);
+  }
 }
 
 Rand::Rand(bool do_open): fd_(-1), i_(kBufferSize)
