@@ -5,8 +5,9 @@ namespace sun
 
 void Block::Set(const uint8_t *a)
 {
-  while (!IsFull())
-    b_.a[i_++] = *a++;
+  i_=0;
+  b_.n=*(uint64_t *)a;
+  i_=kBlockSize;
 }
 
 void Block::Set(uint8_t v)

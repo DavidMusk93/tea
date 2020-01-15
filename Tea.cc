@@ -109,8 +109,8 @@ Tea::output_t Tea::Decrypt(input_t in)
   if (n%8 || n<16)
     goto end;
   ip=in.data();
-  for (i=1; i<=n; ++i) {
-    cipher.Set(*ip++);
+  for (i=8; i<=n; i+=8,ip+=8) {
+    cipher.Set(ip);
     if (cipher.IsFull()) {
       t1=cipher;
       cipher.Xor(b2);
